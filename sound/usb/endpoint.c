@@ -555,8 +555,8 @@ static void release_urbs(struct snd_usb_endpoint *ep, int force)
 	ep->prepare_data_urb = NULL;
 
 	/* stop urbs */
-	deactivate_urbs(ep, force);
-	wait_clear_urbs(ep);
+    deactivate_urbs(ep, force);
+    wait_clear_urbs(ep);
 
 	for (i = 0; i < ep->nurbs; i++)
 		release_urb_ctx(&ep->urb[i]);
