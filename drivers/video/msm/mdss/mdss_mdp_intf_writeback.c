@@ -50,7 +50,7 @@ struct mdss_mdp_writeback_ctx {
 	struct mdss_mdp_format_params *dst_fmt;
 	u16 width;
 	u16 height;
-	struct mdss_rect dst_rect;
+	struct mdss_mdp_img_rect dst_rect;
 
 	u8 rot90;
 	u32 bwc_mode;
@@ -602,5 +602,5 @@ int mdss_mdp_writeback_display_commit(struct mdss_mdp_ctl *ctl, void *arg)
 			ctl->mixer_right->params_changed++;
 	}
 
-	return mdss_mdp_display_commit(ctl, arg, NULL);
+	return mdss_mdp_display_commit(ctl, arg);
 }
