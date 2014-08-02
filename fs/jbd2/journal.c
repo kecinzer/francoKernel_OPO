@@ -1347,25 +1347,29 @@ void jbd2_journal_update_sb_log_tail(journal_t *journal, tid_t tail_tid,
  */
 static void jbd2_mark_journal_empty(journal_t *journal)
 {
-	journal_superblock_t *sb = journal->j_superblock;
+    journal_superblock_t *sb = journal->j_superblock;
 
-	BUG_ON(!mutex_is_locked(&journal->j_checkpoint_mutex));
-	read_lock(&journal->j_state_lock);
-	jbd_debug(1, "JBD2: Marking journal as empty (seq %d)\n",
-		  journal->j_tail_sequence);
+    BUG_ON(!mutex_is_locked(&journal->j_checkpoint_mutex));
+    read_lock(&journal->j_state_lock);
+    /* Is it already empty? */
+    if (sb->s_start == 0) {
+        read_unlock(&journal->j_state_lock);
+        return;
+    }
+    jbd_debug(1, "JBD2: Marking journal as empty (seq %d)\n",
+          journal->j_tail_sequence);
 
-	sb->s_sequence = cpu_to_be32(journal->j_tail_sequence);
-	sb->s_start    = cpu_to_be32(0);
-	read_unlock(&journal->j_state_lock);
+    sb->s_sequence = cpu_to_be32(journal->j_tail_sequence);
+    sb->s_start    = cpu_to_be32(0);
+    read_unlock(&journal->j_state_lock);
 
-	jbd2_write_superblock(journal, WRITE_FUA);
+    jbd2_write_superblock(journal, WRITE_FUA);
 
-	/* Log is no longer empty */
-	write_lock(&journal->j_state_lock);
-	journal->j_flags |= JBD2_FLUSHED;
-	write_unlock(&journal->j_state_lock);
+    /* Log is no longer empty */
+    write_lock(&journal->j_state_lock);
+    journal->j_flags |= JBD2_FLUSHED;
+    write_unlock(&journal->j_state_lock);
 }
-
 
 /**
  * jbd2_journal_update_sb_errno() - Update error in the journal.
